@@ -9,8 +9,7 @@ pwm.freq(1000)
 
 pins = [onboard_led]
 
-sample_time = 0.5  # seconds
-u = 0.0  # Initial control output
+sample_time = 0.05  # seconds
 
 
 def read_normalized_adc() -> float:
@@ -23,22 +22,23 @@ def write_pwm(value: float) -> None:
 
 
 pid_controller = PID(
-    kp=0.8,
-    ki=0.0,
-    kd=0.0,
+    kp=0.02,
+    ki=0.008,
+    kd=0.008,
     sample_time=sample_time,
+    deadband=0.005,
     out_min=0.0,
     out_max=1.0,
 )
 
 while True:
     try:
-        onboard_led.toggle()
+        # onboard_led.toggle()
 
-        pv = read_normalized_adc()
-        print(f"Voltage: {pv * 3.3:.2f} V")
+        sp = read_normalized_adc()
+        print(f"Desired output: {sp:.2f}")
 
-        u = pid_controller.compute(pv, u)
+        u = pid_controller.compute(sp, u if "u" in locals() else 0.0)
         print(f"PID Output: {u:.2f}")
         write_pwm(u)
 
