@@ -8,8 +8,8 @@ PORT = "/dev/ttyACM0"
 BAUD = 115200
 MAGIC = b"\xaa\x55"
 FRAME_SAMPLES = 512
-FS = 44100  # Hz
-PLOT_SECONDS = 5.0
+FS = 5000  # 44100  # Hz
+PLOT_SECONDS = 0.5
 
 stream = sounddevice.OutputStream(samplerate=FS, channels=1, dtype="float32")
 stream.start()
@@ -49,7 +49,6 @@ def read_frame(ser: serial.Serial) -> np.ndarray:
     (count,) = struct.unpack("<H", count_bytes)
     payload = read_exact(ser, count * 2)
     samples = np.frombuffer(payload, dtype=np.int16)
-    # print(samples + 32768)
     return samples
 
 

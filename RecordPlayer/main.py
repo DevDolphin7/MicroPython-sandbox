@@ -1,7 +1,7 @@
 from machine import Pin, ADC
-import sys, ustruct, time
+import sys, ustruct, utime
 
-SAMPLE_RATE = 44100  # hz
+SAMPLE_RATE = 5000  # 44100  # hz
 FRAME_SAMPLES = 512  # samples per frame
 MAGIC = b"\xaa\x55"  # frame header
 
@@ -25,22 +25,24 @@ def write_frame(fsamples: int):
 def main():
     print("Starting data acquisition...")
     onboard_led.value(1)
-    time.sleep(0.1)
+    utime.sleep(0.1)
 
-    next_tick = time.ticks_us()
+    next_tick = utime.ticks_us()
     i = 0
 
     while True:
-        now = time.ticks_us()
+        now = utime.ticks_us()
 
-        if time.ticks_diff(now, next_tick) >= 0:
+        if utime.ticks_diff(now, next_tick) >= 0:
             raw = left_channel_raw.read_u16()
-            signed = int(raw + 32768)
+            # right_raw = right_channel_raw.read_u16()
+            # print(raw, right_raw, sep=",  ")
+            signed = int(raw)
 
             buffer[i * 2 : i * 2 + 2] = ustruct.pack("<h", signed)
             i += 1
 
-            next_tick = time.ticks_add(next_tick, period_us)
+            next_tick = utime.ticks_add(next_tick, period_us)
 
             if i >= FRAME_SAMPLES:
                 write_frame(FRAME_SAMPLES)
